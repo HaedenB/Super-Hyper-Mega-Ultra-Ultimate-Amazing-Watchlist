@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Watchlist</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header>
+  <h1>Watchlist</h1>
+  <div class="header-actions">
+    <button id="random-btn" title="Pick something at random from this tab">Random</button>
+    <button id="add-btn" title="Search and add">+ Add</button>
+    <button id="import-btn" title="Import from Letterboxd / MAL">Import</button>
+    <button id="settings-btn" title="API keys">Settings</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="all">All</button>
+  <button class="tab" data-tab="movie">Movies</button>
+  <button class="tab" data-tab="tv">TV Shows</button>
+  <button class="tab" data-tab="anime">Anime</button>
+  <button class="tab" data-tab="game">Games</button>
+  <button class="tab" data-tab="album">Albums</button>
+</nav>
+
+<main id="grid" class="grid"></main>
+
+<div id="empty" class="empty hidden">
+  <p>Nothing here yet. Hit <strong>+ Add</strong> to search, or <strong>Import</strong> a list.</p>
+</div>
+
+<!-- Random pick result -->
+<div class="modal hidden" id="random-modal">
+  <div class="modal-card">
+    <h2>Tonight's pick</h2>
+    <div id="random-content"></div>
+    <div class="modal-actions">
+      <button id="random-again">Again</button>
+      <button data-close="random-modal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / search -->
+<div class="modal hidden" id="add-modal">
+  <div class="modal-card wide">
+    <h2>Add something</h2>
+    <div class="row">
+      <select id="add-type">
+        <option value="movie">Movie</option>
+        <option value="tv">TV Show</option>
+        <option value="anime">Anime</option>
+        <option value="game">Game</option>
+        <option value="album">Album</option>
+      </select>
+      <input type="text" id="add-query" placeholder="Search title..." />
+      <button id="add-search">Search</button>
+    </div>
+    <div id="add-results" class="results"></div>
+    <div class="modal-actions">
+      <button data-close="add-modal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import -->
+<div class="modal hidden" id="import-modal">
+  <div class="modal-card">
+    <h2>Import</h2>
+    <p>
+      <label><strong>Letterboxd</strong> (watchlist.csv)</label><br />
+      <input type="file" id="import-letterboxd" accept=".csv" />
+    </p>
+    <p>
+      <label><strong>MyAnimeList</strong> (animelist .xml)</label><br />
+      <input type="file" id="import-mal" accept=".xml" />
+    </p>
+    <p class="muted small">Letterboxd import requires a TMDB key. MAL import uses Jikan (no key).</p>
+    <div id="import-status" class="muted small"></div>
+    <div class="modal-actions">
+      <button data-close="import-modal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="modal hidden" id="settings-modal">
+  <div class="modal-card">
+    <h2>API keys</h2>
+    <p>
+      <label>TMDB API key (v3)</label>
+      <input type="text" id="key-tmdb" placeholder="e.g. abc123..." />
+      <span class="muted small">Used for Movies & TV Shows.</span>
+    </p>
+    <p>
+      <label>Twitch Client ID (for IGDB)</label>
+      <input type="text" id="key-igdb-id" />
+    </p>
+    <p>
+      <label>Twitch App Access Token (for IGDB)</label>
+      <input type="text" id="key-igdb-token" />
+    </p>
+    <p>
+      <label>CORS proxy (IGDB only)</label>
+      <input type="text" id="key-cors" placeholder="https://corsproxy.io/?" />
+      <span class="muted small">IGDB blocks browser calls without one. Default works for light use.</span>
+    </p>
+    <p class="muted small">Anime uses Jikan (no key). Albums use MusicBrainz (no key).</p>
+    <div class="modal-actions">
+      <button id="settings-save">Save</button>
+      <button data-close="settings-modal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Item detail -->
+<div class="modal hidden" id="detail-modal">
+  <div class="modal-card">
+    <div id="detail-content"></div>
+    <div class="modal-actions">
+      <button id="detail-remove" class="danger">Remove</button>
+      <button data-close="detail-modal">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
