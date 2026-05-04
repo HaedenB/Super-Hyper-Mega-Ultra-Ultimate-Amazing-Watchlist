@@ -122,7 +122,8 @@ body[data-tab="all"]   { --accent: var(--c-all); }
 .card .poster {
   width: 100%;
   aspect-ratio: 2/3;
-  background: #000 center/cover no-repeat;
+  object-fit: cover;
+  display: block;
   background-color: var(--bg-3);
 }
 .card[data-type="album"] .poster { aspect-ratio: 1/1; }

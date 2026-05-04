@@ -99,10 +99,12 @@ function card(item) {
   el.dataset.type = item.type;
   el.dataset.id = item.id;
 
-  const posterStyle = item.poster ? `background-image:url('${item.poster.replace(/'/g, "\\'")}')` : '';
+  const posterImg = item.poster
+    ? `<img class="poster" src="${escapeHtml(item.poster)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" />`
+    : `<div class="poster"></div>`;
   el.innerHTML = `
     <div class="badge">${TYPE_LABELS[item.type] || item.type}</div>
-    <div class="poster" style="${posterStyle}"></div>
+    ${posterImg}
     <div class="meta">
       <div class="title">${escapeHtml(item.title)}</div>
       <div class="sub">${escapeHtml(item.year || item.extra?.subtitle || '')}</div>
@@ -160,13 +162,20 @@ function randomPick() {
 // ============================================================
 // API: TMDB (movies + tv)
 // ============================================================
-async function tmdbSearch(type, query) {
+async function tmdbSearch(type, query, opts = {}) {
   if (!state.settings.tmdb) throw new Error('Set TMDB API key in Settings.');
-  const url = `https://api.themoviedb.org/3/search/${type}?api_key=${encodeURIComponent(state.settings.tmdb)}&query=${encodeURIComponent(query)}`;
+  const params = new URLSearchParams({
+    api_key: state.settings.tmdb,
+    query,
+  });
+  if (opts.year) {
+    params.set(type === 'movie' ? 'primary_release_year' : 'first_air_date_year', opts.year);
+  }
+  const url = `https://api.themoviedb.org/3/search/${type}?${params}`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('TMDB error ' + r.status);
   const data = await r.json();
-  return (data.results || []).slice(0, 12).map(x => ({
+  return (data.results || []).slice(0, 20).map(x => ({
     type,
     sourceId: String(x.id),
     source: 'tmdb',
@@ -175,6 +184,35 @@ async function tmdbSearch(type, query) {
     poster: x.poster_path ? `https://image.tmdb.org/t/p/w300${x.poster_path}` : '',
     extra: { overview: x.overview || '' },
   }));
+}
+
+function normalizeTitle(s) {
+  return (s || '')
+    .toLowerCase()
+    .normalize('NFKD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+async function tmdbFindMovie(name, year) {
+  // Use year filter when available; fall back to no filter.
+  let results = year ? await tmdbSearch('movie', name, { year }) : [];
+  if (!results.length) results = await tmdbSearch('movie', name);
+  if (!results.length) return null;
+
+  const target = normalizeTitle(name);
+  // Exact normalized-title match wins. Prefer year match if known. Otherwise first.
+  const exact = results.filter(r => normalizeTitle(r.title) === target);
+  if (year) {
+    const exactYear = exact.find(r => r.year === year);
+    if (exactYear) return exactYear;
+    if (exact.length) return exact[0];
+    const yearOnly = results.find(r => r.year === year);
+    if (yearOnly) return yearOnly;
+  } else if (exact.length) {
+    return exact[0];
+  }
+  return results[0];
 }
 
 // ============================================================
@@ -330,12 +368,7 @@ async function importLetterboxd(file) {
     if (!name) continue;
     setImportStatus(`Letterboxd: ${i}/${rows.length - 1} — ${name}`);
     try {
-      const results = await tmdbSearch('movie', name);
-      let pick = results[0];
-      if (year) {
-        const yMatch = results.find(r => r.year === year);
-        if (yMatch) pick = yMatch;
-      }
+      const pick = await tmdbFindMovie(name, year);
       if (!pick) { failed++; continue; }
       if (addItem(pick)) added++; else skipped++;
     } catch (e) {
