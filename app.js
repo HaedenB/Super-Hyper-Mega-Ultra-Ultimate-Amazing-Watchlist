@@ -284,21 +284,21 @@ async function igdbSearch(query) {
 // ============================================================
 // API: MusicBrainz + Cover Art Archive (albums)
 // ============================================================
-async function mbSearch(query) {
-  const url = `https://musicbrainz.org/ws/2/release-group/?query=${encodeURIComponent(query)}&fmt=json&limit=12`;
-  const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
-  if (!r.ok) throw new Error('MusicBrainz error ' + r.status);
+async function albumSearch(query) {
+  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=15`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('iTunes error ' + r.status);
   const data = await r.json();
-  return (data['release-groups'] || []).map(rg => ({
+  return (data.results || []).map(x => ({
     type: 'album',
-    sourceId: rg.id,
-    source: 'musicbrainz',
-    title: rg.title,
-    year: rg['first-release-date'] ? rg['first-release-date'].slice(0, 4) : '',
-    poster: `https://coverartarchive.org/release-group/${rg.id}/front-250`,
+    sourceId: String(x.collectionId),
+    source: 'itunes',
+    title: x.collectionName,
+    year: x.releaseDate ? x.releaseDate.slice(0, 4) : '',
+    poster: x.artworkUrl100 ? x.artworkUrl100.replace('100x100bb', '400x400bb') : '',
     extra: {
       overview: '',
-      subtitle: (rg['artist-credit'] || []).map(a => a.name).join(', '),
+      subtitle: x.artistName || '',
     },
   }));
 }
@@ -312,7 +312,7 @@ async function doSearch(type, query) {
     case 'tv':    return tmdbSearch('tv', query);
     case 'anime': return jikanSearch(query);
     case 'game':  return igdbSearch(query);
-    case 'album': return mbSearch(query);
+    case 'album': return albumSearch(query);
     default: return [];
   }
 }
@@ -461,7 +461,16 @@ function bind() {
   // Search
   $('#add-search').addEventListener('click', runSearch);
   $('#add-query').addEventListener('keydown', e => {
-    if (e.key === 'Enter') runSearch();
+    if (e.key === 'Enter') { e.preventDefault(); runSearch(); }
+  });
+  let debounceTimer = null;
+  const triggerLive = () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(runSearch, 700);
+  };
+  $('#add-query').addEventListener('input', triggerLive);
+  $('#add-type').addEventListener('change', () => {
+    if ($('#add-query').value.trim()) runSearch();
   });
 
   // Imports
@@ -473,14 +482,17 @@ function bind() {
   });
 }
 
+let searchSeq = 0;
 async function runSearch() {
   const type = $('#add-type').value;
   const query = $('#add-query').value.trim();
   const results = $('#add-results');
-  if (!query) return;
+  if (!query) { results.innerHTML = ''; return; }
+  const mySeq = ++searchSeq;
   results.innerHTML = '<div class="muted small">Searching...</div>';
   try {
     const items = await doSearch(type, query);
+    if (mySeq !== searchSeq) return; // a newer search has started
     if (!items.length) {
       results.innerHTML = '<div class="muted small">No results.</div>';
       return;
@@ -507,6 +519,7 @@ async function runSearch() {
       results.appendChild(row);
     }
   } catch (e) {
+    if (mySeq !== searchSeq) return;
     results.innerHTML = `<div class="muted small">Error: ${escapeHtml(e.message)}</div>`;
   }
 }

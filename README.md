@@ -11,7 +11,7 @@ Open `index.html` in a browser, or push to GitHub Pages.
    - **Twitch Client ID + App Access Token** — used for IGDB (games). See <https://api-docs.igdb.com/#getting-started>.
    - **CORS proxy** — IGDB blocks direct browser calls. Default is `https://corsproxy.io/?`. Replace with your own proxy if needed.
    - Anime uses **Jikan** (no key, MAL data).
-   - Albums use **MusicBrainz** + Cover Art Archive (no key).
+   - Albums use **iTunes Search API** (no key, sorted by popularity).
 
 2. **+ Add** → pick a type, search, click Add.
 
