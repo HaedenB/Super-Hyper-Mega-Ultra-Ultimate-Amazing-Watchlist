@@ -99,7 +99,7 @@ function card(item) {
   el.dataset.type = item.type;
   el.dataset.id = item.id;
 
-  const posterStyle = item.poster ? `background-image:url("${item.poster}")` : '';
+  const posterStyle = item.poster ? `background-image:url('${item.poster.replace(/'/g, "\\'")}')` : '';
   el.innerHTML = `
     <div class="badge">${TYPE_LABELS[item.type] || item.type}</div>
     <div class="poster" style="${posterStyle}"></div>
