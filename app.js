@@ -13,6 +13,7 @@ const state = {
     corsProxy: 'https://corsproxy.io/?',
   },
   activeTab: 'all',
+  filter: '',
 };
 
 const TYPE_LABELS = {
@@ -22,6 +23,35 @@ const TYPE_LABELS = {
   game: 'Game',
   album: 'Album',
 };
+
+const RANDOM_LABELS = {
+  all:   { top: 'SURPRISE ME',          bot: 'Random pick',         placeholder: 'Search the list…' },
+  movie: { top: 'ADMIT ONE',            bot: 'Surprise screening',  placeholder: 'Search the marquee…' },
+  tv:    { top: 'SHUFFLE PROGRAMMING',  bot: 'Random channel',      placeholder: 'Search programming…' },
+  anime: { top: '適当',                 bot: 'Roll the dice',       placeholder: 'Search · 検索…' },
+  game:  { top: 'PICK FOR ME',          bot: 'Random from backlog', placeholder: 'Search library…' },
+  album: { top: 'Drop the needle',      bot: 'Random spin',         placeholder: 'Search the crate…' },
+};
+
+const BRAND_SUBS = {
+  all:   'EST. MMXXVI',
+  movie: 'EST. 2026 · NOW SHOWING',
+  tv:    'CH 04 · BROADCASTING',
+  anime: 'アニメ・コレクション',
+  game:  'USER · PLAYER ONE',
+  album: 'RECORDS · EST. MMXXVI',
+};
+
+const KANJI_POOL = ['先', '夢', '光', '影', '風', '鏡', '炎', '月', '空', '雷'];
+
+function hashStr(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
 
 // ============================================================
 // Storage
@@ -76,12 +106,36 @@ function closeModal(id) { $('#' + id).classList.add('hidden'); }
 // Rendering
 // ============================================================
 function render() {
-  document.body.dataset.tab = state.activeTab;
-  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === state.activeTab));
+  const tab = state.activeTab;
+  document.body.dataset.tab = tab;
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
 
-  const items = state.activeTab === 'all'
-    ? [...state.items].sort((a, b) => b.addedAt - a.addedAt)
-    : state.items.filter(it => it.type === state.activeTab).sort((a, b) => b.addedAt - a.addedAt);
+  // Re-skin top bar text
+  const labels = RANDOM_LABELS[tab] || RANDOM_LABELS.all;
+  $('.random-top').textContent = labels.top;
+  $('.random-bot').textContent = labels.bot;
+  $('#filter-input').placeholder = labels.placeholder;
+  $('.brand-sub').textContent = BRAND_SUBS[tab] || BRAND_SUBS.all;
+
+  // Filter + sort items
+  const f = state.filter.trim().toLowerCase();
+  let items = tab === 'all'
+    ? [...state.items]
+    : state.items.filter(it => it.type === tab);
+  if (f) {
+    items = items.filter(it =>
+      it.title.toLowerCase().includes(f) ||
+      (it.extra?.subtitle || '').toLowerCase().includes(f)
+    );
+  }
+  items.sort((a, b) => b.addedAt - a.addedAt);
+
+  // Banner
+  const banner = $('#banner');
+  banner.innerHTML = bannerHtml(tab, items.length);
+
+  // Now Spinning hero (Albums only)
+  renderNowSpinning(tab, items);
 
   const grid = $('#grid');
   grid.innerHTML = '';
@@ -93,6 +147,69 @@ function render() {
   }
 }
 
+function bannerHtml(tab, n) {
+  switch (tab) {
+    case 'movie':
+      return `<span class="banner-pill">●●●  NOW SHOWING  ●●●</span>
+              <span>${n} TITLES · DOLBY · 35MM · 70MM · DIGITAL</span>`;
+    case 'tv':
+      return `<span class="banner-pill">▶ LIVE GUIDE</span>
+              <span>${n} CHANNELS · STEREO · CC</span>`;
+    case 'anime':
+      return `<span class="banner-pill">— ARCHIVE INDEX —</span>
+              <span>${n} 作品 / ${n} TITLES</span>`;
+    case 'game':
+      return `<span class="banner-pill">■ BACKLOG</span>
+              <span>${n} TITLES · ONLINE · SYNCED</span>`;
+    case 'album':
+      return `<span class="banner-pill">▽ THE CRATE</span>
+              <span>${n} RECORDS · 33⅓ RPM</span>`;
+    default:
+      return `<span class="banner-pill">EVERYTHING</span>
+              <span>${n} ITEMS · ALL CATEGORIES</span>`;
+  }
+}
+
+function renderNowSpinning(tab, items) {
+  let hero = $('#now-spinning');
+  if (!hero) {
+    hero = document.createElement('div');
+    hero.id = 'now-spinning';
+    hero.className = 'now-spinning';
+    $('#banner').after(hero);
+  }
+  if (tab !== 'album') {
+    hero.classList.remove('has-content');
+    hero.innerHTML = '';
+    return;
+  }
+  const albums = state.items.filter(it => it.type === 'album').sort((a,b)=>b.addedAt-a.addedAt);
+  if (!albums.length) {
+    hero.classList.remove('has-content');
+    hero.innerHTML = '';
+    return;
+  }
+  const a = albums[0];
+  hero.classList.add('has-content');
+  hero.innerHTML = `
+    <div class="ns-platter">
+      <div class="ns-cover">
+        ${a.poster ? `<img src="${escapeHtml(a.poster)}" alt="" referrerpolicy="no-referrer" />` : ''}
+      </div>
+    </div>
+    <div class="ns-info">
+      <div class="ns-label">A1 · LATEST ADDITION</div>
+      <div class="ns-title">${escapeHtml(a.title)}</div>
+      <div class="ns-artist">${escapeHtml(a.extra?.subtitle || '')}${a.year ? ' · ' + escapeHtml(a.year) : ''}</div>
+    </div>
+    <div class="ns-rpm">
+      <div class="ns-rpm-num">33⅓</div>
+      <div class="ns-rpm-label">RPM</div>
+    </div>
+  `;
+  hero.onclick = () => showDetail(a);
+}
+
 function card(item) {
   const el = document.createElement('div');
   el.className = 'card';
@@ -100,18 +217,68 @@ function card(item) {
   el.dataset.id = item.id;
 
   const posterImg = item.poster
-    ? `<img class="poster" src="${escapeHtml(item.poster)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" />`
-    : `<div class="poster"></div>`;
-  el.innerHTML = `
-    <div class="badge">${TYPE_LABELS[item.type] || item.type}</div>
-    ${posterImg}
-    <div class="meta">
-      <div class="title">${escapeHtml(item.title)}</div>
-      <div class="sub">${escapeHtml(item.year || item.extra?.subtitle || '')}</div>
-    </div>
-  `;
+    ? `<img class="poster" src="${escapeHtml(item.poster)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'" />`
+    : '';
+
+  // Per-type decorations
+  const extras = cardExtras(item);
+
+  // Albums get a special wrapper containing the vinyl + cover sleeve
+  if (item.type === 'album') {
+    el.innerHTML = `
+      <div class="poster-wrap">
+        <div class="ab-vinyl"><div class="ab-vinyl-label">${escapeHtml(item.year || '')}</div></div>
+        <div class="ab-cover">
+          ${posterImg}
+        </div>
+      </div>
+      <div class="meta">
+        <div class="title">${escapeHtml(item.title)}</div>
+        <div class="sub">${escapeHtml(item.extra?.subtitle || '')}${item.year ? ' · ' + escapeHtml(item.year) : ''}</div>
+      </div>
+    `;
+  } else {
+    el.innerHTML = `
+      <div class="poster-wrap">
+        <div class="badge">${TYPE_LABELS[item.type] || item.type}</div>
+        ${posterImg}
+        ${extras}
+      </div>
+      <div class="meta">
+        <div class="title">${escapeHtml(item.title)}</div>
+        <div class="sub">${escapeHtml(item.year || item.extra?.subtitle || '')}</div>
+      </div>
+    `;
+  }
   el.addEventListener('click', () => showDetail(item));
   return el;
+}
+
+function cardExtras(item) {
+  switch (item.type) {
+    case 'movie':
+      return `
+        <div class="letterbox-top"></div>
+        <div class="letterbox-bot"></div>
+        <div class="now-showing-stamp">NOW<br/>SHOWING</div>
+      `;
+    case 'anime': {
+      const k = KANJI_POOL[hashStr(item.title) % KANJI_POOL.length];
+      return `
+        <div class="an-halftone"></div>
+        <div class="an-speedlines"></div>
+        <div class="an-kanji" aria-hidden="true">${k}</div>
+        <div class="an-burst">
+          <span class="an-burst-num">${escapeHtml(item.year || '')}</span>
+          <span class="an-burst-label">YR</span>
+        </div>
+      `;
+    }
+    case 'game':
+      return `<div class="gm-want">+ WANT</div>`;
+    default:
+      return '';
+  }
 }
 
 function escapeHtml(s) {
@@ -471,6 +638,20 @@ function bind() {
   $('#add-query').addEventListener('input', triggerLive);
   $('#add-type').addEventListener('change', () => {
     if ($('#add-query').value.trim()) runSearch();
+  });
+
+  // Top filter input
+  $('#filter-input').addEventListener('input', e => {
+    state.filter = e.target.value;
+    render();
+  });
+
+  // ⌘K / Ctrl+K focuses the top filter
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      $('#filter-input').focus();
+    }
   });
 
   // Imports

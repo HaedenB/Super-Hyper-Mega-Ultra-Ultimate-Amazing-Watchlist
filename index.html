@@ -3,33 +3,60 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="referrer" content="no-referrer" />
 <title>Watchlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-<header>
-  <h1>Watchlist</h1>
-  <div class="header-actions">
-    <button id="random-btn" title="Pick something at random from this tab">Random</button>
-    <button id="add-btn" title="Search and add">+ Add</button>
-    <button id="import-btn" title="Import from Letterboxd / MAL">Import</button>
-    <button id="settings-btn" title="API keys">Settings</button>
+<body data-tab="all">
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark"></span>
+    <div class="brand-text">
+      <div class="brand-name">WATCHLIST</div>
+      <div class="brand-sub">EST. MMXXVI</div>
+    </div>
+  </div>
+
+  <div class="search">
+    <span class="search-icon">⌕</span>
+    <input id="filter-input" placeholder="Search the list…" />
+    <kbd>⌘K</kbd>
+  </div>
+
+  <button id="random-btn" class="random-cta" title="Pick at random">
+    <span class="random-mark"></span>
+    <span class="random-label">
+      <span class="random-top">SURPRISE ME</span>
+      <span class="random-bot">Random pick</span>
+    </span>
+  </button>
+
+  <div class="tools">
+    <button id="add-btn" title="Search and add">+&nbsp;ADD</button>
+    <button id="import-btn" title="Import">IMPORT</button>
+    <button id="settings-btn" title="API keys">⚙</button>
   </div>
 </header>
 
 <nav class="tabs" id="tabs">
-  <button class="tab active" data-tab="all">All</button>
-  <button class="tab" data-tab="movie">Movies</button>
-  <button class="tab" data-tab="tv">TV Shows</button>
-  <button class="tab" data-tab="anime">Anime</button>
-  <button class="tab" data-tab="game">Games</button>
-  <button class="tab" data-tab="album">Albums</button>
+  <span class="tabs-decor"></span>
+  <button class="tab active" data-tab="all"><span class="tab-num">00</span><span class="tab-name">All</span></button>
+  <button class="tab" data-tab="movie"><span class="tab-num">01</span><span class="tab-name">Movies</span></button>
+  <button class="tab" data-tab="tv"><span class="tab-num">02</span><span class="tab-name">TV Shows</span></button>
+  <button class="tab" data-tab="anime"><span class="tab-num">03</span><span class="tab-name">Anime</span></button>
+  <button class="tab" data-tab="game"><span class="tab-num">04</span><span class="tab-name">Games</span></button>
+  <button class="tab" data-tab="album"><span class="tab-num">05</span><span class="tab-name">Albums</span></button>
 </nav>
+
+<div class="banner" id="banner"></div>
 
 <main id="grid" class="grid"></main>
 
 <div id="empty" class="empty hidden">
-  <p>Nothing here yet. Hit <strong>+ Add</strong> to search, or <strong>Import</strong> a list.</p>
+  <p>Nothing here yet. Hit <strong>+&nbsp;ADD</strong> to search, or <strong>IMPORT</strong> a list.</p>
 </div>
 
 <!-- Random pick result -->
