@@ -44,6 +44,18 @@ const BRAND_SUBS = {
 
 const KANJI_POOL = ['先', '夢', '光', '影', '風', '鏡', '炎', '月', '空', '雷'];
 
+const SCHEDULE_DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+const SCHEDULE_TIMES = ['7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM', '11:00 PM'];
+
+function fakeSchedule(title) {
+  const h = hashStr(title);
+  return {
+    day: SCHEDULE_DAYS[h % 7],
+    time: SCHEDULE_TIMES[(h >> 3) % SCHEDULE_TIMES.length],
+    channel: String(((h >> 5) % 90) + 10).padStart(2, '0'),
+  };
+}
+
 function hashStr(s) {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) {
@@ -225,16 +237,37 @@ function card(item) {
 
   // Albums get a special wrapper containing the vinyl + cover sleeve
   if (item.type === 'album') {
+    const genre = item.extra?.genre
+      ? `<div class="ab-genre-sticker">${escapeHtml(item.extra.genre)}</div>`
+      : '';
     el.innerHTML = `
       <div class="poster-wrap">
         <div class="ab-vinyl"><div class="ab-vinyl-label">${escapeHtml(item.year || '')}</div></div>
         <div class="ab-cover">
           ${posterImg}
+          ${genre}
         </div>
       </div>
       <div class="meta">
         <div class="title">${escapeHtml(item.title)}</div>
         <div class="sub">${escapeHtml(item.extra?.subtitle || '')}${item.year ? ' · ' + escapeHtml(item.year) : ''}</div>
+      </div>
+    `;
+  } else if (item.type === 'tv') {
+    const sch = fakeSchedule(item.title);
+    el.innerHTML = `
+      <div class="poster-wrap">
+        <div class="badge">CH ${sch.channel}</div>
+        ${posterImg}
+      </div>
+      <div class="meta">
+        <div class="title">${escapeHtml(item.title)}</div>
+        <div class="sub">${escapeHtml(item.year || '')}${item.extra?.subtitle ? ' · ' + escapeHtml(item.extra.subtitle) : ''}</div>
+      </div>
+      <div class="tv-schedule">
+        <div class="tv-sched-day">${sch.day}</div>
+        <div class="tv-sched-time">${sch.time}</div>
+        <div class="tv-sched-tag">PRIME</div>
       </div>
     `;
   } else {
@@ -466,6 +499,7 @@ async function albumSearch(query) {
     extra: {
       overview: '',
       subtitle: x.artistName || '',
+      genre: x.primaryGenreName || '',
     },
   }));
 }
