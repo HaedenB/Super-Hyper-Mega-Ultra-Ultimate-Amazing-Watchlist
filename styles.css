@@ -279,6 +279,10 @@ body[data-tab="movie"] .random-cta {
   border-radius: 2px;
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   padding: 8px 22px;
+  transition: clip-path 0.18s ease, transform 0.12s ease, box-shadow 0.15s ease;
+}
+body[data-tab="movie"] .random-cta:hover {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
 body[data-tab="movie"] .tools button { border-radius: 2px; }
 
