@@ -965,7 +965,7 @@ body[data-tab="album"] .now-spinning.has-content { display: flex; }
 .small { font-size: 12px; }
 
 /* ============================================================
-   MODALS — keep neutral dark for consistency
+   MODALS — inherit the active tab theme tokens
    ============================================================ */
 .modal {
   position: fixed; inset: 0;
@@ -974,9 +974,9 @@ body[data-tab="album"] .now-spinning.has-content { display: flex; }
   z-index: 1000; padding: 20px;
 }
 .modal-card {
-  background: #18181a;
-  color: #ececec;
-  border: 1px solid #2c2c30;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
   border-radius: 10px;
   padding: 20px 24px;
   width: auto;
@@ -988,28 +988,39 @@ body[data-tab="album"] .now-spinning.has-content { display: flex; }
   font-family: "Inter", sans-serif;
 }
 .modal-card.wide { max-width: 720px; }
-.modal-card h2 { margin: 0 0 16px; font-size: 18px; font-weight: 600; }
+.modal-card h2 {
+  margin: 0 0 16px; font-size: 18px; font-weight: 600;
+  color: var(--ink);
+}
 .modal-card p { margin: 12px 0; }
-.modal-card label { display: block; margin-bottom: 4px; color: #9a9a9a; font-size: 13px; }
+.modal-card label { display: block; margin-bottom: 4px; color: var(--ink-dim); font-size: 13px; }
 .modal-card input, .modal-card select {
-  background: #222226; color: #ececec;
-  border: 1px solid #2c2c30; padding: 8px 10px;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 8px 10px;
   border-radius: 6px; font: inherit; width: 100%;
 }
-.modal-card .muted { color: #9a9a9a; }
+.modal-card input:focus, .modal-card select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.modal-card .muted { color: var(--ink-dim); }
 .modal-actions {
   display: flex; gap: 8px; justify-content: flex-end;
   margin-top: 18px;
 }
 .modal-card button {
-  background: #222226; color: #ececec;
-  border: 1px solid #2c2c30;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
   padding: 8px 14px; border-radius: 6px;
   cursor: pointer; font: inherit;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
-.modal-card button:hover { background: #2e2e33; border-color: #3a3a40; }
+.modal-card button:hover { border-color: var(--accent); color: var(--accent); }
 .modal-card button.danger { color: #c45454; border-color: #5a2c2c; }
-.modal-card button.danger:hover { background: #3a1f1f; }
+.modal-card button.danger:hover { background: rgba(196,84,84,0.12); border-color: #c45454; color: #c45454; }
 .row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
 .row > select { width: 130px; flex-shrink: 0; }
 .row > input { flex: 1; }
@@ -1021,17 +1032,17 @@ body[data-tab="album"] .now-spinning.has-content { display: flex; }
 .result-item {
   display: flex; gap: 12px; align-items: center;
   padding: 8px;
-  border: 1px solid #2c2c30;
+  border: 1px solid var(--line);
   border-radius: 6px;
-  background: #222226;
+  background: var(--bg);
 }
 .result-item img {
   width: 50px; height: 75px; object-fit: cover;
-  background: #000; border-radius: 3px; flex-shrink: 0;
+  background: var(--panel-2); border-radius: 3px; flex-shrink: 0;
 }
 .result-item .info { flex: 1; min-width: 0; }
-.result-item .info .t { font-weight: 500; }
-.result-item .info .y { color: #9a9a9a; font-size: 12px; }
+.result-item .info .t { font-weight: 500; color: var(--ink); }
+.result-item .info .y { color: var(--ink-dim); font-size: 12px; }
 .d-poster {
   display: block;
   max-width: 100%;
@@ -1040,11 +1051,34 @@ body[data-tab="album"] .now-spinning.has-content { display: flex; }
   margin: 0 auto 14px;
   border-radius: 6px;
 }
-#detail-content h3 { margin: 0 0 4px; }
+#detail-content h3 { margin: 0 0 4px; color: var(--ink); }
 #detail-content .d-sub, #random-content .d-sub {
-  color: #9a9a9a; margin-bottom: 12px; font-size: 13px;
+  color: var(--ink-dim); margin-bottom: 12px; font-size: 13px;
 }
-#detail-content .d-overview { font-size: 14px; line-height: 1.5; }
+#detail-content .d-overview { font-size: 14px; line-height: 1.5; color: var(--ink); }
+#random-content h3 { color: var(--ink); }
+
+/* Per-theme topical touches on modals */
+body[data-tab="movie"] .modal-card { border-radius: 2px; }
+body[data-tab="movie"] .modal-card h2 { font-family: "Anton", sans-serif; letter-spacing: 0.06em; }
+body[data-tab="tv"] .modal-card { border-left: 3px solid var(--accent); }
+body[data-tab="tv"] .modal-card h2 { font-family: "JetBrains Mono", monospace; letter-spacing: 0.18em; text-transform: uppercase; font-size: 16px; }
+body[data-tab="anime"] .modal-card {
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+body[data-tab="anime"] .modal-card h2 { font-family: "DM Serif Display", serif; font-weight: 400; font-size: 22px; }
+body[data-tab="anime"] .modal-card button.danger { color: var(--accent); border-color: var(--accent); }
+body[data-tab="anime"] .modal-card button.danger:hover { background: var(--accent); color: var(--panel); }
+body[data-tab="album"] .modal-card {
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+body[data-tab="album"] .modal-card h2 { font-family: "DM Serif Display", serif; font-weight: 400; font-size: 22px; }
+body[data-tab="game"] .modal-card { border-radius: 8px; box-shadow: 0 0 0 1px rgba(102,217,255,0.18), 0 0 40px rgba(102,217,255,0.1); }
+body[data-tab="game"] .modal-card h2 { font-family: "Bebas Neue", sans-serif; letter-spacing: 0.18em; }
 
 /* ============================================================
    RESPONSIVE

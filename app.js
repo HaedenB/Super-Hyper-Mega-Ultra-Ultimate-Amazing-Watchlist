@@ -4,6 +4,8 @@
 const STORAGE_KEY = 'watchlist:v1';
 const SETTINGS_KEY = 'watchlist:settings:v1';
 
+const HARDCODED_TMDB = 'fa1126a077661155eaa8867ecfc86979';
+
 const state = {
   items: [],          // array of {id, type, title, year, poster, sourceId, source, extra}
   settings: {
@@ -363,9 +365,8 @@ function randomPick() {
 // API: TMDB (movies + tv)
 // ============================================================
 async function tmdbSearch(type, query, opts = {}) {
-  if (!state.settings.tmdb) throw new Error('Set TMDB API key in Settings.');
   const params = new URLSearchParams({
-    api_key: state.settings.tmdb,
+    api_key: HARDCODED_TMDB,
     query,
   });
   if (opts.year) {
@@ -547,10 +548,6 @@ function parseCSV(text) {
 }
 
 async function importLetterboxd(file) {
-  if (!state.settings.tmdb) {
-    setImportStatus('Set TMDB key first.');
-    return;
-  }
   const text = await file.text();
   const rows = parseCSV(text);
   if (!rows.length) return;
@@ -635,7 +632,6 @@ function bind() {
     openModal('import-modal');
   });
   $('#settings-btn').addEventListener('click', () => {
-    $('#key-tmdb').value = state.settings.tmdb;
     $('#key-igdb-id').value = state.settings.igdbClientId;
     $('#key-igdb-token').value = state.settings.igdbToken;
     $('#key-cors').value = state.settings.corsProxy;
@@ -644,7 +640,6 @@ function bind() {
 
   // Settings save
   $('#settings-save').addEventListener('click', () => {
-    state.settings.tmdb = $('#key-tmdb').value.trim();
     state.settings.igdbClientId = $('#key-igdb-id').value.trim();
     state.settings.igdbToken = $('#key-igdb-token').value.trim();
     state.settings.corsProxy = $('#key-cors').value.trim();

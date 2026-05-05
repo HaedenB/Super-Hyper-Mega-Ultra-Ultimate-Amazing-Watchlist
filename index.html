@@ -117,11 +117,7 @@
 <div class="modal hidden" id="settings-modal">
   <div class="modal-card">
     <h2>API keys</h2>
-    <p>
-      <label>TMDB API key (v3)</label>
-      <input type="text" id="key-tmdb" placeholder="e.g. abc123..." />
-      <span class="muted small">Used for Movies & TV Shows.</span>
-    </p>
+    <p class="muted small">TMDB key is hardcoded. Anime uses Jikan (no key). Albums use the iTunes Search API (no key).</p>
     <p>
       <label>Twitch Client ID (for IGDB)</label>
       <input type="text" id="key-igdb-id" />
@@ -135,7 +131,6 @@
       <input type="text" id="key-cors" placeholder="https://corsproxy.io/?" />
       <span class="muted small">IGDB blocks browser calls without one. Default works for light use.</span>
     </p>
-    <p class="muted small">Anime uses Jikan (no key). Albums use the iTunes Search API (no key).</p>
     <div class="modal-actions">
       <button id="settings-save">Save</button>
       <button data-close="settings-modal">Close</button>
