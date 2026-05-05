@@ -24,6 +24,7 @@ const TYPE_LABELS = {
   anime: 'Anime',
   game: 'Game',
   album: 'Album',
+  book: 'Book',
 };
 
 const RANDOM_LABELS = {
@@ -33,6 +34,7 @@ const RANDOM_LABELS = {
   anime: { top: '適当',                 bot: 'Roll the dice',       placeholder: 'Search · 検索…' },
   game:  { top: 'PICK FOR ME',          bot: 'Random from backlog', placeholder: 'Search library…' },
   album: { top: 'Drop the needle',      bot: 'Random spin',         placeholder: 'Search the crate…' },
+  book:  { top: 'CHECK ME OUT',         bot: 'A random title',      placeholder: 'Search the stacks…' },
 };
 
 const BRAND_SUBS = {
@@ -42,6 +44,7 @@ const BRAND_SUBS = {
   anime: 'アニメ・コレクション',
   game:  'USER · PLAYER ONE',
   album: 'RECORDS · EST. MMXXVI',
+  book:  'ARCHIVE · OPEN STACKS',
 };
 
 const KANJI_POOL = ['先', '夢', '光', '影', '風', '鏡', '炎', '月', '空', '雷'];
@@ -284,6 +287,8 @@ function cardExtras(item) {
     }
     case 'game':
       return `<div class="gm-want">+ WANT</div>`;
+    case 'book':
+      return `<div class="bk-stamp">TO<br/>READ</div>`;
     default:
       return '';
   }
@@ -479,6 +484,28 @@ async function albumSearch(query) {
 }
 
 // ============================================================
+// API: Open Library (books)
+// ============================================================
+async function bookSearch(query) {
+  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=15&fields=key,title,author_name,first_publish_year,cover_i,subject`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('Open Library error ' + r.status);
+  const data = await r.json();
+  return (data.docs || []).map(x => ({
+    type: 'book',
+    sourceId: x.key, // e.g. "/works/OL12345W"
+    source: 'openlibrary',
+    title: x.title,
+    year: x.first_publish_year ? String(x.first_publish_year) : '',
+    poster: x.cover_i ? `https://covers.openlibrary.org/b/id/${x.cover_i}-L.jpg` : '',
+    extra: {
+      overview: '',
+      subtitle: (x.author_name || []).slice(0, 2).join(', '),
+    },
+  }));
+}
+
+// ============================================================
 // Search dispatcher
 // ============================================================
 async function doSearch(type, query) {
@@ -488,6 +515,7 @@ async function doSearch(type, query) {
     case 'anime': return jikanSearch(query);
     case 'game':  return igdbSearch(query);
     case 'album': return albumSearch(query);
+    case 'book':  return bookSearch(query);
     default: return [];
   }
 }

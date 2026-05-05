@@ -960,6 +960,191 @@ body[data-tab="album"] .now-spinning.has-content { display: flex; }
 }
 
 /* ============================================================
+   THEME: BOOKS — parchment / sepia / library stamp
+   ============================================================ */
+body[data-tab="book"] {
+  --bg: #ece2c8;
+  --panel: #f4ebd1;
+  --panel-2: #e0d3b3;
+  --line: rgba(45,30,18,0.18);
+  --ink: #2a1d12;
+  --ink-dim: #6b573e;
+  --accent: #8a2a2a;     /* library stamp red */
+  --accent-2: #b48a3a;   /* gilt */
+  --display: "Old Standard TT", "Cormorant Garamond", "EB Garamond", serif;
+}
+body[data-tab="book"] {
+  background-image:
+    radial-gradient(ellipse at 15% 0%, rgba(138,42,42,0.05), transparent 50%),
+    radial-gradient(ellipse at 85% 100%, rgba(180,138,58,0.07), transparent 50%);
+}
+body[data-tab="book"]::before {
+  content: ""; position: fixed; inset: 0; z-index: 100;
+  pointer-events: none;
+  opacity: 0.35; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+}
+body[data-tab="book"] .topbar { border-bottom: 2px solid var(--ink); }
+body[data-tab="book"] .tabs { border-bottom: 1px solid var(--ink); }
+body[data-tab="book"] .brand-mark {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--panel), 0 0 0 4px var(--ink);
+  width: 14px; height: 14px;
+  border-radius: 0;
+}
+body[data-tab="book"] .brand-name {
+  font-family: var(--display);
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+body[data-tab="book"] .brand-sub {
+  font-family: "Special Elite", "Courier Prime", monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+body[data-tab="book"] .search {
+  background: var(--panel);
+  border: 1.5px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+body[data-tab="book"] .search input {
+  font-family: var(--display);
+  font-size: 15px;
+}
+body[data-tab="book"] .search input::placeholder { font-style: italic; color: var(--ink-dim); }
+body[data-tab="book"] .random-cta {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 4px 4px 0 var(--accent);
+  padding: 8px 18px;
+}
+body[data-tab="book"] .random-cta:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--accent);
+}
+body[data-tab="book"] .random-mark {
+  width: 20px; height: 20px;
+  background: var(--accent);
+  border-radius: 0;
+  color: var(--panel);
+}
+body[data-tab="book"] .random-mark::before { content: "✦"; font-size: 12px; }
+body[data-tab="book"] .random-top {
+  font-family: var(--display);
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+body[data-tab="book"] .random-bot {
+  font-family: "Special Elite", monospace;
+  color: var(--ink-dim);
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-size: 10px;
+}
+body[data-tab="book"] .tools button {
+  background: transparent;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  border-radius: 0;
+  font-family: "Special Elite", monospace;
+  letter-spacing: 0.08em;
+}
+body[data-tab="book"] .tools button:hover { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+body[data-tab="book"] .tab-name { font-family: var(--display); font-style: italic; font-size: 18px; letter-spacing: 0; font-weight: 400; }
+body[data-tab="book"] .tab.active .tab-name { font-style: normal; font-weight: 700; }
+body[data-tab="book"] .tab-num { font-family: "Special Elite", monospace; }
+body[data-tab="book"] .tab.active::after { background: var(--accent); height: 3px; box-shadow: none; }
+
+/* book cards: aged spine, ribbon header, library stamp on hover */
+body[data-tab="book"] .card[data-type="book"] .poster-wrap {
+  aspect-ratio: 2 / 3;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--panel);
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+body[data-tab="book"] .card[data-type="book"]:hover {
+  transform: translate(-2px, -2px);
+}
+body[data-tab="book"] .card[data-type="book"]:hover .poster-wrap {
+  box-shadow: 6px 6px 0 var(--ink);
+  border-color: var(--ink);
+}
+/* Page-edge gradient on right side suggesting book pages */
+body[data-tab="book"] .card[data-type="book"] .poster-wrap::after {
+  content: "";
+  position: absolute; top: 0; right: 0; bottom: 0; width: 4px;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.18));
+  z-index: 2; pointer-events: none;
+}
+body[data-tab="book"] .card[data-type="book"] .badge {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  font-family: "Special Elite", monospace;
+  letter-spacing: 0.18em;
+  border-radius: 0;
+}
+body[data-tab="book"] .card[data-type="book"] .meta { padding-top: 12px; }
+body[data-tab="book"] .card[data-type="book"] .title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+}
+body[data-tab="book"] .card[data-type="book"] .sub {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-dim);
+  letter-spacing: 0;
+}
+
+.bk-stamp { display: none; }
+body[data-tab="book"] .card[data-type="book"] .bk-stamp {
+  display: block;
+  position: absolute; top: 50%; left: 50%; z-index: 4;
+  transform: translate(-50%, -50%) rotate(-12deg) scale(0.6);
+  border: 3px solid var(--accent);
+  color: var(--accent);
+  padding: 8px 14px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  line-height: 0.95;
+  text-align: center;
+  text-transform: uppercase;
+  background: rgba(244,235,209,0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+body[data-tab="book"] .card[data-type="book"]:hover .bk-stamp {
+  opacity: 0.95;
+  transform: translate(-50%, -50%) rotate(-12deg) scale(1);
+}
+
+body[data-tab="book"] .modal-card {
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+body[data-tab="book"] .modal-card h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
    EMPTY STATE
    ============================================================ */
 .empty {
