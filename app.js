@@ -144,10 +144,6 @@ function render() {
   }
   items.sort((a, b) => b.addedAt - a.addedAt);
 
-  // Banner
-  const banner = $('#banner');
-  banner.innerHTML = bannerHtml(tab, items.length);
-
   // Now Spinning hero (Albums only)
   renderNowSpinning(tab, items);
 
@@ -161,36 +157,13 @@ function render() {
   }
 }
 
-function bannerHtml(tab, n) {
-  switch (tab) {
-    case 'movie':
-      return `<span class="banner-pill">●●●  NOW SHOWING  ●●●</span>
-              <span>${n} TITLES · DOLBY · 35MM · 70MM · DIGITAL</span>`;
-    case 'tv':
-      return `<span class="banner-pill">▶ LIVE GUIDE</span>
-              <span>${n} CHANNELS · STEREO · CC</span>`;
-    case 'anime':
-      return `<span class="banner-pill">— ARCHIVE INDEX —</span>
-              <span>${n} 作品 / ${n} TITLES</span>`;
-    case 'game':
-      return `<span class="banner-pill">■ BACKLOG</span>
-              <span>${n} TITLES · ONLINE · SYNCED</span>`;
-    case 'album':
-      return `<span class="banner-pill">▽ THE CRATE</span>
-              <span>${n} RECORDS · 33⅓ RPM</span>`;
-    default:
-      return `<span class="banner-pill">EVERYTHING</span>
-              <span>${n} ITEMS · ALL CATEGORIES</span>`;
-  }
-}
-
 function renderNowSpinning(tab, items) {
   let hero = $('#now-spinning');
   if (!hero) {
     hero = document.createElement('div');
     hero.id = 'now-spinning';
     hero.className = 'now-spinning';
-    $('#banner').after(hero);
+    $('#hero-slot').after(hero);
   }
   if (tab !== 'album') {
     hero.classList.remove('has-content');
